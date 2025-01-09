@@ -6,6 +6,8 @@ The config files used to parametrize the simulation and/or controller are custom
 Such a config file can contain one `<redisConfiguration>` , one `<simvizConfiguration>` element, and several `<robotControlConfiguration>` elements (one per robot to control).
 We will go over those in details using the two example files [ `aa_detailled_panda_simviz_only.xml` ](https://github.com/manips-sai-org/sai-interfaces/blob/master/examples/config_files/aa_detailled_panda_simviz_only.xml) and [ `aa_detailled_panda_control_only.xml` ](https://github.com/manips-sai-org/sai-interfaces/blob/master/examples/config_files/aa_detailled_panda_control_only.xml).
 
+If we want to control a robot task using a haptic device, the config file can also contain one or several `<hapticDeviceControlConfiguration>` elements. A third example file details this: [`aa_detailled_panda_haptic_control.xml`](https://github.com/manips-sai-org/sai-interfaces/blob/master/examples/config_files/aa_detailled_panda_haptic_control.xml)
+
 ### The `<redisConfiguration>` element
 
 Let's start with the redis configuration. This one is very simple. It is optionnal, but if present, only one can be present. It has 3 potential attributes to define the namespace prefix for redis keys, the ip address and port of the redis server.
@@ -280,7 +282,7 @@ The active controller can be changed at runtime. All the other parameters are fi
 
 The children of the `<controller>` element are task definitions:
 
-##### The `<motionForceTask>` task definition insode a `<controller>`
+##### The `<motionForceTask>` task definition inside a `<controller>`
 
 This child element of `<controller>` defined a motion force task in the hierarchy of the corresponding controller
 
@@ -542,7 +544,7 @@ The default values can be found in the RobotControllerConfig.h file under the Mo
 	maxDesiredMoment='5' />
 ```
 
-##### The `<jointTask>` task definition insode a `<controller>`
+##### The `<jointTask>` task definition inside a `<controller>`
 
 This child element of `<controller>` defined a joint task (that can be full or partial) in the hierarchy of the corresponding controller
 
@@ -650,4 +652,192 @@ Default values can be found in the JointTask class in the sai-primitives library
 <gains kp="50.0"
 	kv="14.0"
 	ki="0.0" />
+```
+
+### The `<hapticDeviceControlConfiguration>` element
+
+Finally, let's look at the haptic control. We support any haptic devices that can use the [chaiHapticDeviceDriver](https://github.com/manips-sai-org/chaiHapticdeviceRedisDriver). In this third example, we have a config file containing all the elements, that defined a simulation with a robot controlled using a haptic device. If we want to control haptically one of the tasks defined in the robot controller, we need to set a haptic device control configuration for that robot task in the config file by using the `<hapticDeviceControlConfiguration>` element. Note that only a motion force task can be controlled haptically. The haptic controller can be setup as an impedance controller where the motion of the haptic device is transferred to the robot, and the forces felt to the robot are sent back and applied to the haptic device; or admittance mode where the haptic device is maintained at the center of its workspace by a force field, and pushing the device in a direction will command a robot velocity in that direction.
+
+Initially, the haptic device will be in homing mode, going to the center of its workspace, and then the control is switched to the desired mode (impedance or admittance).
+For haptic devices with switches (or gripper used as a switch), we can require the switch to be pressed in order to exit homing. We can also use the switch to either disconnect the haptic control from the robot task temporarily (clutch mode), or to switch between translation only vs translation plus orientation control. The switch can also be configured to use a click to trigger the switching back and forth, or to have to hold the switch pressed in order to change the mode, and release it to change back.
+
+We will go step by step over the [commented example file](https://github.com/manips-sai-org/sai-interfaces/blob/master/examples/config_files/aa_detailled_panda_haptic_control.xml) to explain the possible attributes and children elements.
+
+```
+<!--
+The <hapticDeviceControlConfiguration> element contains the configuration for the haptic device control.
+There can be multiple <hapticDeviceControlConfiguration> elements in the configuration file, each one
+should correspond to a unique haptic device and a unique controlled robot task.
+The attributes of the <hapticDeviceControlConfiguration> element are:
+	- controlMode: the control mode of the haptic device. Possible values are "impedance" and "admittance". Default is "impedance".
+	- switchFunction: the function of the switch. Possible values are "clutch" and "orientationControl". Default is "clutch".
+		Clutch means that the switch is used to enable/disable the haptic control (move the haptic device without moving the robot).
+		OrientationControl means that the switch is used to switch between translation only, and translation plus orientation control.
+	- switchUsageType: the usage type of the switch. Possible values are "click" and "hold". Default is "click".
+	- orientationTeleopEnabled: whether the orientation teleoperation is enabled or not initially. Default is false.
+	- useSwitchToExitHoming: whether the switch should be used to exit the homing mode or if the homing mode is exited automatically. Default is true.
+	- controlFrequency: the control frequency of the haptic device control. Default is 1000.0 Hz.
+-->
+<hapticDeviceControlConfiguration controlMode="impedance"
+	switchFunction="clutch"
+	switchUsageType="click"
+	orientationTeleopEnabled="false"
+	useSwitchToExitHoming="true"
+	controlFrequency="1000.0">
+```
+
+Let us now look at its children elements
+
+#### The `<controlledRobotTask>` sub element
+This is the only mandatory sub element of the `<hapticDeviceControlConfiguration>`. It defined which task in which controller for which robot is to be controlled by the haptic device.
+
+```
+<!--
+The <controlledRobotTask> element contains the name of the robot, the name of the controller, and the name of the task that the haptic device should control.
+One and only one is required per <hapticDeviceControlConfiguration> element.
+Its attributes are:
+	- robotName: the name of the robot that the haptic device should control.
+	- controllerName: the name of the controller for that robot that contains the task the haptic device should control.
+	- taskName: the name of the task that the haptic device should control.
+-->	
+<controlledRobotTask robotName="Panda"
+	controllerName="cartesian_controller"
+	taskName="eef_task" />
+```
+
+#### The `<baseFrame>` sub element
+Defined the base frame of the haptic device with respect to the world frame.
+
+```
+<!--
+The optional <baseFrame> element contains the position and orientation of the base frame of the haptic device with respect to the world frame.
+The attributes of the <baseFrame> element are:
+	- xyz: the position of the base frame in the world frame. Default is "0 0 0".
+	- rpy: the orientation of the base frame in the world frame in radians. Default is "0 0 0".
+-->
+<baseFrame xyz="0 0 0"
+	rpy="0 0 0.5" />
+```
+
+#### The `<logger>` sub element
+Similar to the loggers for the robot controller and simviz, logs data from the haptic device controller.
+
+```
+<!--
+The optional <logger> element contains the configuration for the logger.
+Its attributes are:
+	- logFolderName: the name of the folder where the log files should be saved. Default is "log_files/haptic_controllers".
+	- logFrequency: the frequency at which the logger should log data. Default is 100 Hz.
+	- enabledAtStartup: whether the logger should be enabled at startup or not. Default is false.
+	- addTimestampToFilename: whether the timestamp should be added to the filename of the log files or not. Default is true.
+-->
+<logger logFolderName="log_files/haptic_controllers"
+	logFrequency="100"
+	enabledAtStartup="false"
+	addTimestampToFilename="true" />
+```
+
+#### The `<homingMode>` sub element
+Defined the velocities at which the device homes.
+```
+<!--
+The optional <homingMode> element contains the configuration for the homing mode.
+Its attributes are:
+	- maxLinearVelocity: the homing maximum linear velocity of the haptic device in m/s. Default is 0.15.
+	- maxAngularVelocity: the homing maximum angular velocity of the haptic device in rad/s. Default is 3.1415927.
+-->
+<homingMode maxLinearVelocity="0.15"
+	maxAngularVelocity="3.1415927" />
+```
+
+#### The `<impedanceMode>` sub element
+Defined the configuration of the impedance mode. Only useful if impedance mode is used for that haptic device. It contains several sub elements for the different parametrizeable aspects of the ipedance mode.
+```
+<!--
+The optional <impedanceMode> element contains the configuration for the impedance mode.
+It is only used if the controlMode is set to "impedance".
+-->
+<impedanceMode>
+```
+
+##### The `<virtualWorkspaceLimits>` definition in impedance mode
+```
+<!--
+The optional <virtualWorkspaceLimits> element contains the configuration for the virtual workspace limits.
+The virtual workspace limits implements a virtual sphere in translation and a virtual cone in orientation.
+The device is haptically contrained to stay inside the sphere and cone.
+Its attributes are:
+	- enabled: whether the virtual workspace limits are enabled or not initially. Default is false.
+	- radius: the radius of the virtual workspace in meters. Default is 0.1.
+	- angle: the angle of the virtual workspace in radians. Default is 1.0471975512.
+-->
+<virtualWorkspaceLimits enabled="false"
+	radius="0.1"
+	angle="1.0471975512" />
+```
+
+##### The `<scalingFactors>` definition in impedance mode
+```
+<!--
+The optional <scalingFactors> element contains the scaling factors for the impedance control.
+It represents the ratio between the robot motion and the haptic device motion.
+For example, a scaling factor of 2 means that 1cm od haptic device motion corresponds to 2cm of robot motion.
+Its attributes are:
+	- linear: the linear scaling factor. Default is 1.0.
+	- angular: the angular scaling factor. Default is 1.0.
+-->
+<scalingFactors linear="1.0"
+	angular="1.0" />
+```
+
+##### The `<variableDamping>` definition in impedance mode
+Impedance mode can implement variable damping. This is damping that will be applied only in the directions that use direct force feedback. It is damping with a damping coefficient that is a piecewise affine function of the haptic device velocity such that the damping can be set to a low value, or even zero, at low velocities, and to a high value at higher velocities.
+```
+<!--
+The optional <variableDamping> element contains the variable damping parameters for the impedance control.
+The variable damping is a piecewise damping function that depends on the linear and angular velocities of the haptic device.
+The velocity thresholds and damping vectors needs to be the same size, to each value of the velocity corresponds a value of the damping, 
+and the damping is interpolated linearly between the values, in function of the velocity.
+If omitted, there is no damping in impedance mode.
+For a constant value of damping, set the velocity threshold to a vector with only one value equal to 0.0, 
+and the damping to a vector with only one value equal to the desired damping.
+Its attributes are:
+	- linearVelocityThresholds: the linear velocity thresholds in m/s.
+	- linearDamping: the linear damping values in Ns/m.
+	- angularVelocityThresholds: the angular velocity thresholds in rad/s.
+	- angularDamping: the angular damping values in Nms.
+-->
+<variableDamping linearVelocityThresholds="0.1 0.3"
+	linearDamping="0.0 0.3"
+	angularVelocityThresholds="0.25 0.75"
+	angularDamping="0.0 0.1" />
+```
+
+##### The `<forceFeedback>` definition in impedance mode
+The forceFeedback element allows to define both reduction factors and directions of space for proxy based force feedback.
+Reduction factors define which proportion of the robot sensed force is applied to the haptic device in direct force feedback directions.
+Proxy based force feedback means the force feedback comes from the position error between the robot position and its commanded position from the haptic device, instead of the direct robot sensed force. It can be set in certain directions or the whole space by setting the dimension of the proxy based force feedback space (between 0 and 3) and the single direction of proxy feedback (if the dimension is 1) or direct force feedback (if the dimension is 2).
+```
+<!--
+The optional <forceFeedback> element contains the force feedback parameters for the impedance control.
+Those parameters contain the reduction factor (factor between 0 and 1 that reduces the direct feedback force),
+as well as the proxy parametrization (space dimension and axis) for the force and moment feedback.
+The directions can either use proxy based feedback (the feedback force is computed from the position error between the haptic device and the robot),
+or direct force feedback where the sensed robot force is provided as an input to the haptic controller.
+Its attributes are:
+	- reductionFactorForce: the reduction factor for the force feedback. Default is 1.0.
+	- reductionFactorMoment: the reduction factor for the moment feedback. Default is 1.0.
+	- proxyForceSpaceDimension: the space dimension for the proxy force space 
+		(0 means direct force feedback in all directions, 3 means proxy based feedback in all directions). Default is 0.
+	- proxyMomentSpaceDimension: the space dimension for the proxy moment space. 
+		(0 means direct moment feedback in all directions, 3 means proxy based feedback in all directions). Default is 0.
+	- proxyForceAxis: the axis for the force feedback. Default is "0 0 1".
+	- proxyMomentAxis: the axis for the moment feedback. Default is "0 0 1".
+-->
+<forceFeedback reductionFactorForce="1.0"
+	reductionFactorMoment="1.0"
+	proxyForceSpaceDimension="0"
+	proxyMomentSpaceDimension="0"
+	proxyForceAxis="0 0 1"
+	proxyMomentAxis="0 0 1" />
 ```
