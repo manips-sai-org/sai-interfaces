@@ -419,7 +419,7 @@ struct RobotControllerConfig {
 	/// If true, the mass matrix is read at runtime from redis, as an input to
 	/// the controller, similarly to the joint states and velocities. If set to
 	/// false, the mass matrix is computed from the urdf mass properties.
-	bool get_mass_matrix_from_redis = false;
+	bool get_mass_matrix_from_redis = true;
 
 	/// @brief Config for the logger attached to the
 	/// RobotControllerRedisInterface

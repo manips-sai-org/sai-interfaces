@@ -38,12 +38,12 @@ the virtual world. Only one is allowed per configuration file.
 Its attributes are:
 	- worldFilePath: Required. The path to the world file to be used
 	- mode: Optional. The mode of the simulation. Possible values are simviz, simOnly, vizOnly. Defaults to simviz
-	- publishMassMatrixToRedis: Optional. Whether to publish the mass matrix to redis for all simulated robots. Defaults to false.
+	- publishMassMatrixToRedis: Optional. Whether to publish the mass matrix to redis for all simulated robots. Defaults to true.
 None of the corresponding config parameters can be changed at runtime.
 -->
 <simvizConfiguration worldFilePath="${WORLD_FILES_FOLDER}/world_panda.urdf"
 	mode="simviz"
-	publishMassMatrixToRedis="false">
+	publishMassMatrixToRedis="true">
 
 ...
 
@@ -177,13 +177,13 @@ Its attributes are:
 	- robotName: Required. The name of the robot
 	- robotModelFile: Required. The path to the URDF file of the robot
 	- controlFrequency: Optional. The control frequency of the robot. Defaults to 1000.0 Hz
-	- getMassMatrixFromRedis: Optional. Whether to get the mass matrix from redis (must be published by the simulation or robot driver) or to compute it from the urdf mass parameters. Defaults to false.
+	- getMassMatrixFromRedis: Optional. Whether to get the mass matrix from redis (must be published by the simulation or robot driver) or to compute it from the urdf mass parameters. Defaults to true.
 None of the corresponding config parameters can be changed at runtime.
 -->
 <robotControlConfiguration robotName="Panda"
 	robotModelFile="${SAI_MODEL_URDF_FOLDER}/panda/panda_arm_sphere.urdf"
 	controlFrequency="1000.0"
-	getMassMatrixFromRedis="false">
+	getMassMatrixFromRedis="true">
 
 ...
 

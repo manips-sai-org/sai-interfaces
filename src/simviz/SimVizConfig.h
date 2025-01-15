@@ -109,7 +109,7 @@ struct SimVizConfig {
 	/// simulation
 	bool enable_gravity_compensation = true;
 	/// @brief The global friction coefficient for the simulation
-	double global_friction_coefficient = 0.0;
+	double global_friction_coefficient = 0.5;
 	/// @brief The global coefficient of restitution for collisions in the
 	/// simulation
 	double global_collision_restitution = 0.0;
@@ -119,7 +119,7 @@ struct SimVizConfig {
 	double speedup_factor = 1.0;
 
 	/// @brief Whether to publish the mass matrices of the robots to redis
-	bool publish_mass_matrices_to_redis = false;
+	bool publish_mass_matrices_to_redis = true;
 
 	/// @brief The dynamic and rendering parameters for each robot or object in
 	/// the simulation.
