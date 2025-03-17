@@ -206,16 +206,6 @@ class CsvPlotter:
                 listbox.insert("end", item)
 
     def plot_graph(self):
-        selected_cols = self.selected_listbox.get(0, "end")
-        y_cols = []
-        for header_name in self.unique_headers:
-            eigen_cols = [
-                col for col in selected_cols
-                if col.startswith(header_name + "__")
-            ]
-            scalar_cols = [col for col in selected_cols if col == header_name]
-
-    def plot_graph(self):
         x_column = self.x_dropdown.get()
         selected_cols = self.selected_listbox.get(0, "end")
 
