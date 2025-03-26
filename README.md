@@ -43,13 +43,15 @@ This will build the wrappers for the controllers and simviz, the MainInterface p
 
 ### Examples
 
-The build process will also build the `MainRedisInterfaceExample`. This is the program to run for all examples. The examples are actually defined in config files, present in the `examples/config_files/` folder. To run an example, you can follow these instructions:
+The build process will also build the `MainRedisInterfaceExample` . This is the program to run for all examples. The examples are actually defined in config files, present in the `examples/config_files/` folder. To run an example, you can follow these instructions:
+
 ```
 cd build/examples/
 ./MainRedisInterfaceExample
 ```
 
-This will run the `panda_simviz_control` config file that simulates and controls a Panda robot. If you want to run another example, let's sau the `double_kuka_simviz_control.xml`, you can add it as an argument in the call of the example:
+This will run the `panda_simviz_control` config file that simulates and controls a Panda robot. If you want to run another example, let's sau the `double_kuka_simviz_control.xml` , you can add it as an argument in the call of the example:
+
 ```
 ./MainRedisInterfaceExample double_kuka_simviz_control.xml
 ```
@@ -60,7 +62,7 @@ You can interact with the controller, the simulation and even reset the simulati
 python3 ui/server.py examples/config_files/webui_generated_file/webui.html
 ```
 
-Now, open a web browser and navigate to the url `localhost:8000`. You should see something like the following:
+Now, open a web browser and navigate to the url `localhost:8000` . You should see something like the following:
 ![](docs/img/ui_interface_main.png)
 
 ### Documentation
@@ -71,14 +73,10 @@ Now, open a web browser and navigate to the url `localhost:8000`. You should see
 
 ## License
 
-Currently pending licensing. PLEASE DO NOT DISTRIBUTE.
+This software is distributed under the terms of the Stanford Academic Software License Agreement For SAI
 
 ## Project contributors
 
 * Mikael Jorda
 * Keven Wang
 * William Jen
-
-## For questions, contact:
-
-mjorda@stanford.edu or mjorda@jorda-tech.com
